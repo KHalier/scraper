@@ -334,22 +334,22 @@ async function scraper(website, retries = 0) {
       }
     });
     // Selector para capturar las URLs de las imágenes
-    const imageElement = $('#landingImage');
-    const imageData = imageElement.attr('data-a-dynamic-image');
+    const images = [];
 
-    if (imageData) {
-      try {
-        // Parsear el atributo data-a-dynamic-image para obtener las URLs
-        const imageUrls = JSON.parse(imageData);
-        const imageUrlsArray = Object.keys(imageUrls); // Obtiene las URLs de las imágenes
-
-        // Agregar URLs de las imágenes al contenido
-        content.push({ images: imageUrlsArray });
-      } catch (error) {
-        console.error('Error parsing image data:', error);
+    const scriptContent = $('script:contains("colorImages")').html();
+    if (scriptContent) {
+      const matches = scriptContent.match(/"hiRes":"(https:\/\/[^"]+)"/g);
+      if (matches) {
+        matches.forEach(match => {
+          const hiResUrl = match.split('"')[3];
+          if (!images.includes(hiResUrl)) images.push(hiResUrl);
+        });
       }
     }
+    // Agregar URLs de las imágenes al contenido
+    content.push({ images: images });
 
+    
     return content;
 
   } catch (error) {
